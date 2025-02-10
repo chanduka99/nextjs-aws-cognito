@@ -1,3 +1,4 @@
+"use client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { signIn } from "next-auth/react";
 
 export function LoginForm({
   className,
@@ -47,7 +49,7 @@ export function LoginForm({
                 </div>
                 <Input id="password" type="password" required />
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" onClick={() => signIn()}>
                 Login
               </Button>
             </div>
