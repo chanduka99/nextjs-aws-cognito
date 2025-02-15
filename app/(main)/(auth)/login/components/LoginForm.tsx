@@ -1,6 +1,5 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,29 +9,25 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
-import { signIn } from "aws-amplify/auth";
+import { handleSignIn } from "../actions/loginFormActions";
+import SubmitButton from "./SubmitButton";
+import { toast } from "sonner";
+// import { useFormState } from "react-dom";
+import { useActionState } from "react";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const signInOutput = await signIn({
-        username: email,
-        password: password,
-      });
-
-      console.log(signInOutput);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [errorMessage, wrappedHandleSignIn] = useActionState(
+    handleSignIn,
+    undefined
+  );
+  // show error as toast
+  if (errorMessage) {
+    console.log(errorMessage);
+    toast.error(errorMessage);
+  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -43,18 +38,16 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form action={wrappedHandleSignIn}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
+                  name="email"
                   placeholder="m@example.com"
                   required
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setEmail(e.target.value)
-                  }
                 />
               </div>
               <div className="grid gap-2">
@@ -67,18 +60,23 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setPassword(e.target.value)
-                  }
-                />
+                <Input id="password" type="password" name="password" required />
               </div>
-              <Button type="submit" className="w-full">
-                Login
-              </Button>
+              <SubmitButton />
+            </div>
+            <div className="flex h-8 items-end space-x-1">
+              <div
+                className="flex h-8 items-end space-x-1"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {/* {errorMessage && (
+                  <div className="flex gap-4 mt-5 mb-5">
+                    <CircleAlert className="h-5 w-5 text-red-500" />
+                    <p className="text-sm text-red-500">{errorMessage}</p>
+                  </div>
+                )} */}
+              </div>
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{" "}

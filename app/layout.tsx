@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ConfigureAmplifyClientSide from "@/config/amplifyCognitoConfig";
+// import ConfigureAmplifyClientSide from "@/config/amplifyCognitoConfig";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +28,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ConfigureAmplifyClientSide />
+        {/* <ConfigureAmplifyClientSide /> */}
         {children}
       </body>
     </html>
