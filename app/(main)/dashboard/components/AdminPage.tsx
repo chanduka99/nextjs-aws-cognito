@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
 import {
   Table,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/table";
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
+import CreateUserModal from "./CreateUserModal";
 
 const statusColors = {
   PROCESSING: "bg-yellow-100 text-yellow-800",
@@ -72,6 +72,7 @@ const users: User[] = [
     Role: "STANDARD_USER",
   },
 ];
+
 export default function AdminPage() {
   const session = useSession();
   if (session?.status == "loading") {
@@ -86,7 +87,9 @@ export default function AdminPage() {
       <div className="flex flex-col justify-center my-10">
         {`Welcome ${session.data?.user?.name}`}
       </div>
-      <Button className="flex ">Create New User</Button>
+      <div className="my-4">
+        <CreateUserModal />
+      </div>
       <Table>
         <TableHeader>
           <TableRow>

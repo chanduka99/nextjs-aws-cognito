@@ -12,7 +12,7 @@ export default async function Dashboard() {
   }
   // check if user is admin
   let isAdmin = false;
-  if (true) {
+  if (session.user.role == "Admins") {
     isAdmin = true;
   }
   console.log("sesssion :", session);

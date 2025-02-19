@@ -9,11 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@geeklabs-co/leco-notification-db": "^0.1.0",
     "@aws-amplify/adapter-nextjs": "^1.4.3",
+    "@geeklabs-co/leco-notification-db": "^0.1.0",
     "@radix-ui/react-avatar": "^1.1.3",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@t3-oss/env-nextjs": "^0.12.0",
     "aws-amplify": "^6.12.3",

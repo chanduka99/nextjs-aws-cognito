@@ -5,6 +5,12 @@ import { jwtDecode } from "jwt-decode";
 
 declare module "next-auth" {
   interface Session {
+    user?: {
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      role?: string | null;
+    };
     accessToken?: unknown;
     idToken?: unknown;
   }
@@ -43,8 +49,13 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const response = await cognito.initiateAuth(params).promise();
-
-          console.log("auth RESULTS:", response.AuthenticationResult);
+          console.log("response chanllengeName:", response.ChallengeName);
+          console.log("respone auth results:", response.AuthenticationResult);
+          console.log(
+            "respone challenge parameters:",
+            response.ChallengeParameters
+          );
+          console.log("response session:", response.Session);
 
           let decodedIdToken;
           if (response.AuthenticationResult?.IdToken) {
@@ -58,12 +69,11 @@ export const authOptions: NextAuthOptions = {
             };
           }
 
-          console.log("decodedIdToken:", decodedIdToken);
-
           const user = {
             id: response.ChallengeParameters?.USER_ID_FOR_SRP as string, // User ID for Secure Remote Password
             name: credentials.username,
             email: decodedIdToken?.email,
+            role: decodedIdToken?.["cognito:groups"][0],
             accessToken: response.AuthenticationResult?.AccessToken,
             idToken: response.AuthenticationResult?.IdToken,
           };
@@ -95,7 +105,10 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // Send properties to the client, like an access_token from a provider.
+      if (session.user) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        session.user.role = (token as any).user.role;
+      }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       session.accessToken = (token.user as any).accessToken;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
