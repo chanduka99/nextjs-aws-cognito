@@ -55,7 +55,19 @@ export default {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+  		keyframes: {
+  			honeycomb: {
+  				'0%, 20%, 80%, 100%': {
+  					opacity: '0',
+  					transform: 'scale(0)',
+  				},
+  				'30%, 70%': {
+  					opacity: '1',
+  					transform: 'scale(1)',
+  				},
+  			},
+  		},
   	}
   },
   plugins: [require("tailwindcss-animate")],

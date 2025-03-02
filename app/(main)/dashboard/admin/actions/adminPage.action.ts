@@ -8,7 +8,7 @@ export interface CognitoUser {
   UserId: string;
   UserName: string;
   Email: string;
-  VerifiedStatus: "PROCESSING" | "VERIFIED" | "FAILED";
+  Status: "ENABLED" | "DISABLED";
   CreatedAt: Date;
   Role: "ADMIN" | "STANDARD_USER";
 }
@@ -57,12 +57,7 @@ export async function getUsers(): Promise<CognitoUser[]> {
           UserId: user.Username,
           UserName: emailAttribute?.Value,
           Email: emailAttribute?.Value,
-          VerifiedStatus:
-            user.UserStatus === "CONFIRMED"
-              ? "VERIFIED"
-              : user.UserStatus === "FORCE_CHANGE_PASSWORD"
-              ? "PROCESSING"
-              : "FAILED",
+          Status: user.Enabled === true ? "ENABLED" : "DISABLED",
           // CreatedAt: Math.floor(
           //   user.UserCreateDate?.getTime() || Date.now() / 1000
           // ),
@@ -84,6 +79,84 @@ export async function getUsers(): Promise<CognitoUser[]> {
     return users.filter((user): user is CognitoUser => user !== null);
   } catch (error) {
     console.error("Error fetching users:", error);
+    throw error;
+  }
+}
+
+export async function enableUser(username: string) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== "Admins") {
+    throw new Error("Unauthorized");
+  }
+
+  const cognito = new AWS.CognitoIdentityServiceProvider();
+
+  try {
+    // First check if user is disabled
+    const user = await cognito
+      .adminGetUser({
+        UserPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID as string,
+        Username: username,
+      })
+      .promise();
+
+    if (user.Enabled) {
+      throw new Error("User is already enabled");
+    }
+
+    await cognito
+      .adminEnableUser({
+        UserPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID as string,
+        Username: username,
+      })
+      .promise();
+    return { success: true };
+  } catch (error) {
+    console.error("Error enabling user:", error);
+    throw error;
+  }
+}
+
+export async function disableUser(username: string) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== "Admins") {
+    throw new Error("Unauthorized");
+  }
+
+  const cognito = new AWS.CognitoIdentityServiceProvider();
+
+  try {
+    await cognito
+      .adminDisableUser({
+        UserPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID as string,
+        Username: username,
+      })
+      .promise();
+    return { success: true };
+  } catch (error) {
+    console.error("Error disabling user:", error);
+    throw error;
+  }
+}
+
+export async function deleteUser(username: string) {
+  const session = await getServerSession(authOptions);
+  if (session?.user?.role !== "Admins") {
+    throw new Error("Unauthorized");
+  }
+
+  const cognito = new AWS.CognitoIdentityServiceProvider();
+
+  try {
+    await cognito
+      .adminDeleteUser({
+        UserPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID as string,
+        Username: username,
+      })
+      .promise();
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting user:", error);
     throw error;
   }
 }

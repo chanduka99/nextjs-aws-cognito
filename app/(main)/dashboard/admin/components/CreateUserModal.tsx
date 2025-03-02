@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
 import { submitForm } from "../actions/createUserModal.action";
 import { RoleType } from "@/constants/roleTypes";
+import { Spinner } from "@/components/ui/spinner";
 function SubmitButton() {
   const { pending } = useFormStatus();
 
@@ -30,8 +30,7 @@ function SubmitButton() {
     <Button type="submit" className="w-full" disabled={pending}>
       {pending ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Please wait
+          <Spinner size="medium" />
         </>
       ) : (
         "Submit"

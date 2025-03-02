@@ -12,10 +12,7 @@ import {
 import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import CreateUserModal from "./CreateUserModal";
-import {
-  getUsers,
-  type CognitoUser,
-} from "../actions/adminPage.getUsers.action";
+
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { RotateCw } from "lucide-react";
@@ -28,12 +25,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MoreHorizontal } from "lucide-react";
-import { deleteUser, disableUser } from "../actions/adminPage.deleteUser.action";
+import {
+  CognitoUser,
+  deleteUser,
+  disableUser,
+  enableUser,
+  getUsers,
+} from "../actions/adminPage.action";
+import { Spinner } from "@/components/ui/spinner";
 
 const statusColors = {
-  PROCESSING: "bg-yellow-100 text-yellow-800",
-  VERIFIED: "bg-green-100 text-green-800",
-  FAILED: "bg-red-100 text-red-800",
+  // PROCESSING: "bg-yellow-100 text-yellow-800",
+  ENABLED: "bg-green-100 text-green-800",
+  DISABLED: "bg-red-100 text-red-800",
 };
 
 const roles = {
@@ -52,7 +56,7 @@ export default function AdminPage() {
       const userData = await getUsers();
       setUsers(userData);
     } catch (error) {
-      toast.error("Failed to fetch users");
+      toast.error("DISABLED to fetch users");
       console.error("Error fetching users:", error);
     } finally {
       setLoading(false);
@@ -74,7 +78,7 @@ export default function AdminPage() {
   if (session?.status === "loading" || loading) {
     return (
       <div className="flex justify-center items-center h-[100vh]">
-        <Loader />
+        <Spinner size="large" />
       </div>
     );
   }
@@ -85,10 +89,8 @@ export default function AdminPage() {
 
   return (
     <div className="p-6">
-      <h2 className="text-2xl font-semibold mb-4">Admin</h2>
-      <div className="flex flex-col justify-center my-10">
-        {`Welcome ${session.data?.user?.name}`}
-      </div>
+      <h2 className="text-2xl font-semibold mb-8">Admin</h2>
+
       <div className="my-4 flex  items-center gap-6">
         <CreateUserModal />
         <Button
@@ -102,7 +104,7 @@ export default function AdminPage() {
       </div>
       {refreshing && (
         <div className="flex justify-center items-center h-[40vh]">
-          <Loader />
+          <Spinner size="large" />
         </div>
       )}
       {!refreshing && (
@@ -112,7 +114,7 @@ export default function AdminPage() {
               <TableHead>User ID</TableHead>
               <TableHead>User Name</TableHead>
               <TableHead>Email</TableHead>
-              <TableHead>Verification Status</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Actions</TableHead>
@@ -125,8 +127,8 @@ export default function AdminPage() {
                 <TableCell>{user.UserName}</TableCell>
                 <TableCell>{user.Email}</TableCell>
                 <TableCell>
-                  <Badge className={statusColors[user.VerifiedStatus]}>
-                    {user.VerifiedStatus}
+                  <Badge className={statusColors[user.Status]}>
+                    {user.Status}
                   </Badge>
                 </TableCell>
                 <TableCell>{roles[user.Role]}</TableCell>
@@ -157,19 +159,35 @@ export default function AdminPage() {
                       >
                         Delete User
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={async () => {
-                          try {
-                            await disableUser(user.Email);
-                            toast.success("User disabled successfully");
-                            await fetchUsers();
-                          } catch (error) {
-                            toast.error("Failed to disable user");
-                          }
-                        }}
-                      >
-                        Disable User
-                      </DropdownMenuItem>
+                      {user.Status === "ENABLED" ? (
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            try {
+                              await disableUser(user.Email);
+                              toast.success("User disabled successfully");
+                              await fetchUsers();
+                            } catch (error) {
+                              toast.error("Failed to disable user");
+                            }
+                          }}
+                        >
+                          Disable User
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={async () => {
+                            try {
+                              await enableUser(user.Email);
+                              toast.success("User enabled successfully");
+                              await fetchUsers();
+                            } catch (error) {
+                              toast.error("Failed to enable user");
+                            }
+                          }}
+                        >
+                          Enable User
+                        </DropdownMenuItem>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
