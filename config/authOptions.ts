@@ -49,13 +49,13 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const response = await cognito.initiateAuth(params).promise();
-          console.log("response chanllengeName:", response.ChallengeName);
-          console.log("respone auth results:", response.AuthenticationResult);
-          console.log(
-            "respone challenge parameters:",
-            response.ChallengeParameters
-          );
-          console.log("response session:", response.Session);
+          // console.log("response chanllengeName:", response.ChallengeName);
+          // console.log("respone auth results:", response.AuthenticationResult);
+          // console.log(
+          //   "respone challenge parameters:",
+          //   response.ChallengeParameters
+          // );
+          // console.log("response session:", response.Session);
 
           let decodedIdToken;
           if (response.AuthenticationResult?.IdToken) {
@@ -77,23 +77,23 @@ export const authOptions: NextAuthOptions = {
             accessToken: response.AuthenticationResult?.AccessToken,
             idToken: response.AuthenticationResult?.IdToken,
           };
-          console.log("user object:", user);
+          // console.log("user object:", user);
           return user;
         } catch (error) {
-          console.error(error);
+          console.error("authOptions authorize function:", error);
           return null;
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, account, profile, trigger, user }) {
-      console.log("jwt callback:", {
-        token,
-        account,
-        profile,
-        trigger,
-      });
+    async jwt({ token, account, user }) {
+      // console.log("jwt callback:", {
+      //   token,
+      //   account,
+      //   profile,
+      //   trigger,
+      // });
       // Persist the OAuth access_token to the token right after signin
       if (account) {
         token.accessToken = account.access_token;
@@ -113,9 +113,9 @@ export const authOptions: NextAuthOptions = {
       session.accessToken = (token.user as any).accessToken;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       session.idToken = (token.user as any).idToken;
-      console.log("session callback:", {
-        session,
-      });
+      // console.log("session callback:", {
+      //   session,
+      // });
       return session;
     },
   },

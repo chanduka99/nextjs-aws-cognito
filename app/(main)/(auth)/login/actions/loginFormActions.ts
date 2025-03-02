@@ -15,9 +15,13 @@ export async function handleSignIn(formData: FormData) {
     password,
     redirect: false,
   });
-
+  // console.log(response);
   if (!response?.ok) {
-    throw new Error("Failed to authenticate. Please try again shortly");
+    // switch (response?.error == "CredentialsSignin")
+    // throw new Error("Failed to authenticate. Please try again shortly");
+    return "Failed to authenticate.Please try again shortly";
   }
   return;
 }
+
+function handleSignInError() {}

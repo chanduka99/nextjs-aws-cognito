@@ -3,3 +3,8 @@ export enum RoleType {
   ADMIN = "Admin",
   STANDARD_USER = "Standard User",
 }
+
+export enum CognitoGroupType {
+  ADMIN = "Admins",
+  STANDARD_USER = "StandardUsers",
+}

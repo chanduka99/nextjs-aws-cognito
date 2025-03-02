@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
-import { submitForm } from "../actions/CreateUserModalAction";
+import { submitForm } from "../actions/createUserModal.action";
 import { RoleType } from "@/constants/roleTypes";
 function SubmitButton() {
   const { pending } = useFormStatus();
