@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { cognito } from "./awsConfig";
 import { jwtDecode } from "jwt-decode";
+import { SignInError } from "@/constants/errorMessages";
 
 declare module "next-auth" {
   interface Session {
@@ -10,6 +11,7 @@ declare module "next-auth" {
       email?: string | null;
       image?: string | null;
       role?: string | null;
+      error?: string | null;
     };
     accessToken?: unknown;
     idToken?: unknown;
@@ -43,14 +45,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const response = await cognito.initiateAuth(params).promise();
-          // console.log("response chanllengeName:", response.ChallengeName);
-          // console.log("respone auth results:", response.AuthenticationResult);
-          // console.log(
-          //   "respone challenge parameters:",
-          //   response.ChallengeParameters
-          // );
-          // console.log("response session:", response.Session);
-
+          console.log("response", response);
           let decodedIdToken;
           if (response.AuthenticationResult?.IdToken) {
             decodedIdToken = jwtDecode(
@@ -71,23 +66,35 @@ export const authOptions: NextAuthOptions = {
             accessToken: response.AuthenticationResult?.AccessToken,
             idToken: response.AuthenticationResult?.IdToken,
           };
-          // console.log("user object:", user);
           return user;
-        } catch (error) {
-          console.error("authOptions authorize function:", error);
+        } catch (error:any) {
+          // let returnObj;
+          switch(error.code){
+            case "NotAuthorizedException":
+              throw new Error(SignInError.INVALID_CREDENTIALS);
+              // returnObj = {error: SignInError.INVALID_CREDENTIALS};
+              // break;
+            case "UserNotFoundException":
+              throw new Error(SignInError.USER_NOT_FOUND);
+              // returnObj = {error: SignInError.USER_NOT_FOUND};
+              // break;
+            case "UserNotConfirmedException":
+              throw new Error(SignInError.USER_NOT_CONFIRMED);
+              // returnObj = {error: SignInError.USER_NOT_CONFIRMED};
+              // break;
+             default:
+              throw new Error("An error occurred");
+              // returnObj = {error: "An error occurred"};
+              // break;
+          }
           return null;
+          // "authOptions authorize function:", error);
         }
       },
     }),
   ],
   callbacks: {
     async jwt({ token, account, user }) {
-      // console.log("jwt callback:", {
-      //   token,
-      //   account,
-      //   profile,
-      //   trigger,
-      // });
       // Persist the OAuth access_token to the token right after signin
       if (account) {
         token.accessToken = account.access_token;
@@ -107,10 +114,20 @@ export const authOptions: NextAuthOptions = {
       session.accessToken = (token.user as any).accessToken;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       session.idToken = (token.user as any).idToken;
-      // console.log("session callback:", {
-      //   session,
-      // });
+
       return session;
     },
-  },
-};
+  //   async signIn(user) {  
+  //     switch ((user as any)?.error) {
+  //       case SignInError.INVALID_CREDENTIALS:
+  //         throw new Error(SignInError.INVALID_CREDENTIALS);
+  //       case SignInError.USER_NOT_FOUND:
+  //         throw new Error(SignInError.USER_NOT_FOUND);
+  //       case SignInError.USER_NOT_CONFIRMED:
+  //         throw new Error(SignInError.USER_NOT_CONFIRMED);
+  //       case "An error occurred":
+  //         throw new Error("An error occurred");    
+  //   }
+  //   return false;
+  // },
+}};

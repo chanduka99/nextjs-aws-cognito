@@ -1,4 +1,5 @@
 "use client";
+import { SignInError } from "@/constants/errorMessages";
 import { signIn } from "next-auth/react";
 
 export async function handleSignIn(formData: FormData) {
@@ -15,13 +16,28 @@ export async function handleSignIn(formData: FormData) {
     password,
     redirect: false,
   });
-  // console.log(response);
-  if (!response?.ok) {
-    // switch (response?.error == "CredentialsSignin")
-    // throw new Error("Failed to authenticate. Please try again shortly");
-    return "Failed to authenticate.Please try again shortly";
+console.log("response in form actions", response);
+  if (response?.error) {
+    return handleSignInError(response.error);
   }
-  return;
+  if (response?.ok) {
+    return {status: "success", message: "Success"};
+  }
+  return { status: "error", message: "Something went wrong" }
 }
 
-function handleSignInError() {}
+function handleSignInError(error: string) {
+  switch (error) {
+    case SignInError.ACCESS_DENIED:
+      return { status: "error", message: "Access denied" };
+    case SignInError.INVALID_CREDENTIALS:
+      return { status: "error", message: "Incorrect username or password" };
+    case SignInError.USER_NOT_FOUND:
+      return { status: "error", message: "User not found" };
+    case SignInError.USER_NOT_CONFIRMED:
+      return { status: "error", message: "User not confirmed" };
+    default:
+      return { status: "error", message: "Something went wrong" };
+  }
+}
+
