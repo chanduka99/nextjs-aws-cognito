@@ -67,16 +67,16 @@ export function Sidebar(props: SidebarProps) {
       </nav>
       <div className="p-4 border-t">
         <div className="flex items-center mb-4">
-          <Avatar className="h-10 w-10 mr-3">
+          <Avatar className="h-8 w-8 mr-3">
             <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
-            <AvatarFallback>{props.userName[0].toUpperCase()}</AvatarFallback>
+            <AvatarFallback className="bg-black text-white text-sm lg:text-md">{props.userName[0].toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">{props.userName}</p>
+            <p className="text-sm lg:text-md">{props.userName}</p>
             {/* <p className="text-sm text-gray-500">{props.email}</p> */}
           </div>
         </div>
-        <Button variant="outline" className="w-full" onClick={() => signOut()}>
+        <Button className="w-full" onClick={() => signOut()}>
           <LogOut className="h-4 w-4 mr-2" />
           Logout
         </Button>
